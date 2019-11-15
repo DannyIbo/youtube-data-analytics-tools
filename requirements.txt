@@ -4,9 +4,9 @@ matplotlib
 seaborn
 numpy
 vaderSentiment
-googleapiclient
-google_auth_oauthlib
-googleapiclient
+google-api-python-client
+google-auth-oauthlib
+google-auth-httplib2
 pytz
 csv
 re
