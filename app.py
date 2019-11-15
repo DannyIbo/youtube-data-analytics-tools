@@ -3,9 +3,11 @@ from config import config
 from src import youtube_data_module_17 as ydt
 from src import viz
 import pandas as pd
+import os
 
 
-API_KEY = config.config['YouTube']['danny']
+# API_KEY = config.config['YouTube']['danny']
+API_KEY = os.environ.get('API_KEY')
 app = Flask(__name__)
 
 
