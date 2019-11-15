@@ -1,0 +1,13 @@
+
+.card-body, .card {
+  height: 100%;
+}
+
+table {
+  border: transparent;
+  text-align: center;
+}
+
+th, td {
+  padding: 2%;
+}
