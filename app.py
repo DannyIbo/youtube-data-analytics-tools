@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from config import config
+# from config import config
 from src import youtube_data_module_17 as ydt
 from src import viz
 import pandas as pd
