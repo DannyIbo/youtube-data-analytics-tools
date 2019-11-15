@@ -1,0 +1,13 @@
+pandas
+flask
+matplotlib
+seaborn
+numpy
+vaderSentiment
+googleapiclient
+google_auth_oauthlib
+googleapiclient
+pytz
+csv
+re
+datetime
