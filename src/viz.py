@@ -167,8 +167,13 @@ def create_wordcloud(text, stopwords=STOPWORDS,video_id=None, channel_title=None
         collocations=False
     ).generate(text)
 
+    if channel_title:
+        title = channel_title
+    else:
+        title = video_id
+
     plt.figure(figsize = (FIG_W, FIG_H))
-    plt.title(f'Wordcloud of Video Tags for "{channel_title}"', fontdict = {'fontsize' : TS})
+    plt.title(f'Wordcloud for "{title}"', fontdict = {'fontsize' : TS})
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
     # plt.show()

@@ -5,9 +5,8 @@ from src import viz
 import pandas as pd
 import os
 
+API_KEY = os.getenv('YOUTUBE_API_KEY')
 
-# API_KEY = config.config['YouTube']['danny']
-API_KEY = os.environ.get('API_KEY')
 app = Flask(__name__)
 
 
