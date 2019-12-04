@@ -46,14 +46,14 @@ The word cloud visuaizes the most used words considering all comments and sub-co
 ![enter image description here](https://github.com/DannyIbo/youtube-data-analytics-tools/raw/master/demo_plots/mDbSFyReulk_wordcloud.png)
 ## Video Demos
 ### Video demo: Comparing channels
-In 1m27s the video walks you through the process of comparing channels.
+In 1m27s the [video](https://www.youtube.com/watch?v=Qg7F0WIKFhM) walks you through the process of comparing channels.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Qg7F0WIKFhM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![enter image description here](https://github.com/DannyIbo/youtube-data-analytics-tools/raw/presentation/video_screenshots/2019124-channels.jpg)](https://www.youtube.com/watch?v=Qg7F0WIKFhM)
 
 ### Video demo: Analyse video comments
-In 1m24s the video walks you through the process analysing comments.
+In 1m24s the [video](https://www.youtube.com/watch?v=TOowWqhAbyw) walks you through the process analysing comments.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/TOowWqhAbyw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![enter image description here](https://github.com/DannyIbo/youtube-data-analytics-tools/raw/presentation/video_screenshots/2019124-comments.jpg)](https://www.youtube.com/watch?v=TOowWqhAbyw)
 
 ## Requirements
 - You need a YouTube Data API to make this work. I do not publish mine here. Get your own for free at [https://console.developers.google.com/](https://console.developers.google.com/)
