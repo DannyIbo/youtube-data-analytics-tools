@@ -1,9 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
-
-  <p><h2 class="card-title">Analyse Video Comments</h2></p>
+  <!-- try out blocks -->
+  <p>
+    <h2 class="card-title">Analyse Video Comments</h2>
+  </p>
   <p></p>
-  <p><h5 class="card-title">Search Results for "{{ query }}"</h5></p>
+  <p>
+    <h5 class="card-title">Search Results for "{{ query }}"</h5>
+  </p>
   <p></p>
 
   {% for item in query_result['items'] %}
@@ -18,6 +22,7 @@
                   <img src={{ item['snippet']['thumbnails']['medium']['url'] }} alt="">
                 </a>
               </p>
+
             </div>
           </div>
         </div>
@@ -32,14 +37,19 @@
                 <p>Comments: {{ item['statistics']['commentCount'] }}</p>
                 <p>Likes: {{ item['statistics']['likeCount'] }}</p>
                 <p>Dislikes: {{ item['statistics']['dislikeCount'] }}</p>
-
+              </p>
               <form class="" action="">
+                <!-- <a href="/video_comments?video_id={{ item['id']['videoId'] }}">
+                  <button class="btn btn-primary">See video comment analysis</button>
+                </a> -->
                 <a href="/video_comments?video_id={{ item['id']['videoId'] }}">
                   <button type="button" class="btn btn-primary">See video comment analysis</button>
                 </a>
+
               </form>
 
             </div>
+
           </div>
         </div>
       </div>

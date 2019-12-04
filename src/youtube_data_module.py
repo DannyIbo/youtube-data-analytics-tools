@@ -1,11 +1,5 @@
-#Explorer: https://developers.google.com/apis-explorer/#search/youtube/youtube/v3/youtube.search.list?part=snippet&channelId=UCSk9vb0Kc2WewD4IwvLJ9Iw&maxResults=50&_h=1&
-#Documentation and source code: https://developers.google.com/youtube/v3/docs/search/list?apix=true
-
+# YouTube Data Module Version 17
 # -*- coding: utf-8 -*-
-
-# Sample Python code for youtube.search.list
-# See instructions for running these code samples locally:
-# https://developers.google.com/explorer-help/guides/code_samples#python
 
 import os
 import googleapiclient.discovery
@@ -36,14 +30,6 @@ def video_categories(youtube, regionCode="None", part=None, id=None):
         video_category_dict = {x['id']: x['snippet']['title'] for x in video_categories_response['items']}
 
         return video_categories_response
-        # in case I ever need a fresh category dict
-        # video_category_dict = {}
-        # for i in range(45):
-        #     cat_id = str(i)
-        #     x = ydt.videoCategories(youtube, regionCode=None, part="snippet", id=cat_id)
-        #     if len(x.get('items')) > 0:
-        #         video_category_dict[x['items'][0]['id']] = x['items'][0]['snippet']['title']
-        # print(video_category_dict)
 
 
 def youtubeAPIkey(DEVELOPER_KEY, OAUTHLIB_INSECURE_TRANSPORT = "1", api_service_name = "youtube", api_version = "v3"):
@@ -570,7 +556,6 @@ def get_all_comments(youtube, video_id):
     all_snippets = thread_snippets + reply_snippets + already_downloaded_replies
     return all_snippets
 
-
 def extract_comments(comments):
     '''Extract comments from a json file.Return a dictionary. Take as input the result of function "get_all_comments()"'''
     comment_dict = {}
@@ -580,7 +565,6 @@ def extract_comments(comments):
         else:
             comment_dict[c['id']] = c['snippet']['textOriginal']
     return comment_dict
-
 
 def concat_comments(comment_dict):
     '''Concat comment in values of a dictionary and return one string. Used for WordCloud input data.'''
@@ -598,7 +582,6 @@ def concat_listelements(series_object):
             for tag in tag_list:
                 result += ' ' + ''.join(tag).upper()
     return result
-
 
 def comments_to_df(all_comments):
     '''Extract comments from "get_all_comments()" json and return a dataframe.'''
@@ -628,7 +611,6 @@ def comments_to_df(all_comments):
     comment_df = pd.DataFrame(data=new_dict).set_index('id')
     return comment_df
 
-
 def analyze_comment_sentiments(comment_df):
     '''Analyse sentiment. Take as input a comment dataframe from "comments_to_df()"'''
     analyzer = SentimentIntensityAnalyzer()
@@ -646,9 +628,7 @@ def analyze_comment_sentiments(comment_df):
             sentiment[k].append(v)
 
     sentiment_df = pd.DataFrame(data=sentiment)
-
     comment_sentiment = pd.concat([comment_df.reset_index(), sentiment_df], axis=1)
-
     return comment_sentiment
 
 def get_channel_video_df(youtube, channel_ids):

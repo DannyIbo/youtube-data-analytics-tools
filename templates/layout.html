@@ -32,7 +32,7 @@
                 <h5 class="card-title">Compare Channels</h5>
                 <p class="card-text">Please enter the names of channels you want to compare.</p>
 
-                <form class="" action="/select_channels2">
+                <form class="" action="/select_channels">
                   <p><input type="text" name="channel_id_1"></p>
                   <p><input type="text" name="channel_id_2"></p>
                   <p><input type="text" name="channel_id_3"></p>
@@ -53,6 +53,7 @@
                     <input type="text" name="query">
                   </p>
                   <button class="btn btn-primary">Search Video</button>
+
                 </form>
 
               </div>
@@ -62,9 +63,10 @@
         </div>
       </div>
 
-      {% block content %}
-      {% endblock %}
+      {% block content %}{% endblock %}
 
     </div>
+
+
   </body>
 </html>

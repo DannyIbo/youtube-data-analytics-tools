@@ -1,6 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for
-# from config import config
-from src import youtube_data_module_17 as ydt
+from flask import Flask, render_template, request
+from src import youtube_data_module as ydt
 from src import viz
 import pandas as pd
 import os
@@ -9,32 +8,37 @@ API_KEY = os.getenv('YOUTUBE_API_KEY')
 
 app = Flask(__name__)
 
-
 @app.route('/')
 def home():
     return render_template('layout.html')
 
+# This page returns search results, when a user hits the 'Search Video' button
 @app.route('/select_video')
 def select_video():
     result_dictionary = request.args
     query = result_dictionary['query']
     youtube = ydt.youtubeAPIkey(API_KEY)
     query_result = ydt.youtubeSearchListStatistics(youtube, q=query)
+
     return render_template(
-        'select_video2.html',
+        'select_video.html',
         query_result=query_result,
         query=query
     )
 
+# This page returns a video comment analysis, when a user hits the 'See video comment analysis' button
 @app.route('/video_comments')
 def video_comments():
+    # Get video id
     video_id = request.args.get('video_id')
+    # Create credentials object
     youtube = ydt.youtubeAPIkey(API_KEY)
+    # Request comments and write the results to a dictionary
     print('Getting all comments')
     all_snippets = ydt.get_all_comments(youtube, video_id)
     print('Writing comments to dict')
     comment_dict = ydt.extract_comments(all_snippets)
-    # List of images that will be displayed
+    # Create empty list for images that will be displayed
     image_names = []
     print('Generating wordcloud')
     # Create wordcloud, save image, append image name
@@ -55,14 +59,16 @@ def video_comments():
     image_names.append(viz.scatterplot_sentiment_likecount(comment_sentiment2, pos_sent, neg_sent, video_id))
     # Calculate correlation
     like_count_sentiment_corr = round(comment_sentiment2.corr().loc['like_count'][5],2)
+
     return render_template(
-        'video_comments2.html',
+        'video_comments.html',
         image_names=image_names,
         like_count_sentiment_corr=like_count_sentiment_corr
     )
 
-@app.route('/select_channels2', methods=['GET', 'POST'])
-def select_channels2():
+# This page return search results for the channel queries a user inputs and hits the 'Search Channels' button
+@app.route('/select_channels', methods=['GET', 'POST'])
+def select_channels():
     result_dictionary = request.args
     channel_names = []
     # Extract channel ids from dict
@@ -71,16 +77,18 @@ def select_channels2():
             channel_names.append(result_dictionary[channel_name])
     # Get credentials
     youtube = ydt.youtubeAPIkey(API_KEY)
-    # Execut query
+    # Execut search query for user input for channel names
     query_results = {}
     for cn in channel_names:
         result = ydt.youtubeSearchList(youtube, channel_id=None, q=cn, maxResults=5, type='channel')
         query_results[cn] =  result
+
     return render_template(
-        'select_channels3.html',
+        'select_channels.html',
         query_results=query_results
     )
 
+# This page returns the channel coparison analysis when a user selects at least one channel with a radio button and hits 'Compare channels now'
 @app.route('/channels', methods=['GET', 'POST'])
 def channels():
     result_dictionary = request.args
@@ -91,9 +99,9 @@ def channels():
             channel_ids.append(result_dictionary[c_id])
     # Get credentials
     youtube = ydt.youtubeAPIkey(API_KEY)
-    # Get Data
+    # Get video data for list of channel ids
     video_df = ydt.get_channel_video_df(youtube, channel_ids)
-    # List of images that will be displayed
+    # Create an empty list for images that will be displayed
     image_names = []
     # Create a barplot, save the image, append name to list
     image_names.append(viz.barplot_channel_video_count(video_df, channel_ids))
@@ -113,16 +121,10 @@ def channels():
         wordcloud_string = ydt.concat_listelements(channel_video_series)
         image_names.append(viz.create_wordcloud(wordcloud_string, stopwords=None, video_id=channel_id, channel_title=channel_title))
     # Modifiy dataframe for table
-    metric = 'view'
-    df_table = video_df.sort_values(by=f'{metric}_count',ascending=False).groupby('channel_title').head().sort_values(by=f'{metric}_count', ascending=False)[['channel_title', 'title', f'{metric}_count']].rename(columns={'channel_title':'Channel Title', 'title':'Video Title', f'{metric}_count':f'{metric.capitalize()} Count'}).set_index('Channel Title')
-    df_table = df_table.reset_index()
-    df_table = df_table.set_index(df_table.index + 1)
-    df_table = df_table.reset_index()
-    df_table = df_table.rename(columns={'index':'Rank'})
-    df_table = df_table.set_index(['Rank', 'Channel Title', 'Video Title',f'{metric.capitalize()} Count'])
-    df_table.reset_index(inplace=True)
+    df_table = viz.top_videos(video_df, metric='view', n=5)
+
     return render_template(
-        'channels2.html',
+        'channels.html',
         result_dictionary=result_dictionary,
         video_df=video_df,
         image_names=image_names,
