@@ -17,6 +17,7 @@ The number of publicly available videos is counted in visualized.
 
 #### Barplot for visualizing count of (un-)clickable links in video descriptions
 In YouTube's video descriptions links need to be formatted with an `https://` to be clickable. This condition is checked and counted.
+
 ![enter image description here](https://github.com/DannyIbo/youtube-data-analytics-tools/raw/master/demo_plots/UCqC_GY2ZiENFz2pwL0cSfAw_UCf2WBemooP2gBBx3lrraNQw_UCCndqRyI-5Zl8Mutlq71ASw_barplot_links.png)
 
 #### Word Cloud for Video Tags
