@@ -1,6 +1,6 @@
 # YouTube Data Analytics Tools
 
-## Main functionalities
+## Main features
 1. Compare channel KPIs such as video count, views, duration, un-/clickable link count and video tags and show visualizations.
 2. Analyse video comments with time series and sentiments  and show visualizations.
 
@@ -61,7 +61,7 @@ In 1m24s the [video](https://www.youtube.com/watch?v=TOowWqhAbyw) walks you thro
 
 
 ## Inspiration
-Working as an analyst and consultant gave me repeated tasks that took a lot of time. I wanted to automate tasks that are frequently required in the industry, especially in video production companies for he content intelligence.
+Working as an analyst and consultant gave me repeated tasks that took a lot of time. I wanted to automate tasks that are frequently required in the industry, especially in video production companies for the content intelligence.
 
 ## To Dos
 1. Some plots show floats instead of integers, which does not make too much sense at the specific points so far and needs to be changed.
