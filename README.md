@@ -1,4 +1,7 @@
 # YouTube Data Analytics Tools
+Compare channels (i.e. video count, video views, video tags, links in descriptions etc.) and analyze video comments (time series, sentigment, used words count etc.)
+
+![Example plots](https://github.com/DannyIbo/youtube-data-analytics-tools/raw/master/example_plots/ezgif-1-7954082339d8.gif)
 
 ## Description
 The script has a browser-based user interface and runs on flask. It downloads data directly from YouTube using the Data API v3. The data gets extracted and transformed into a pandas dataframe. Matplotlib, Seaborn and WordCloud are used to save plots as images.
@@ -8,7 +11,7 @@ The script has a browser-based user interface and runs on flask. It downloads da
 2. Analyse video comments with time series and sentiments  and show visualizations.
 
 ## Installation & Requirements
-- You need a YouTube Data API key to make this work. I do not publish mine here. Get your own for free at [https://console.developers.google.com/](https://console.developers.google.com/)
+- You need a YouTube Data API key to make this work. I do not publish mine here. Get your own for free at !!!![https://console.developers.google.com/](https://console.developers.google.com/)
 - On Windows 10 open the comand line and type `setx YOUTUBE_API_KEY “REPLACE_THIS_TEXT_WITH_YOUR_YOUTUBE_DATA_API_KEY”`
 - Clone this repository
 - `pip install -r requirements.txt`
