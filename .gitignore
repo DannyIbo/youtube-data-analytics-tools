@@ -107,4 +107,4 @@ venv.bak/
 config.py
 
 # Divers
-static/images/
+static/images/*
