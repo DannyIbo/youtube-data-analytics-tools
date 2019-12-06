@@ -15,107 +15,75 @@ TS = 15 # Title size
 def barplot_channel_video_count(df_all, channel_ids):
     '''Create a barplot and save the image to a folder. Return image name. Take a dataframe with videodata  as input. Input channel_ids to render image name.'''
 
-    # Create image filename
     channel_ids_string = '_'.join(channel_ids)
     image_name = f'static/images/{channel_ids_string}_barplot_channel_video_count.png'
 
-    #Plot it
     plt.figure(figsize=(FIG_W, FIG_H))
     df_all.groupby('channel_title').size().sort_values(ascending=False).plot.bar()
     plt.xticks(rotation=ROT)
     plt.xlabel("Channel Name")
     plt.ylabel("Video Count")
     plt.title('Video Counts per Channel', fontdict = {'fontsize' : TS})
-
-    # Save plot
     plt.savefig(image_name, dpi=100)
+
     return image_name
 
 def histogram_video_duration_count(df_all, channel_ids):
     '''Create a histogram and save the image to a folder. Return image name. Take a dataframe with videodata  as input. Input channel_ids to render image name.'''
 
-    # Calculate minutes
     df_all['duration_min'] = df_all['duration_sec'].astype('int') / 60
 
-    # Calculate outlier
+    # Calculate outlier and clean them
     outlier = (df_all['duration_min'].describe()['75%'] - df_all['duration_min'].describe()['25%']) * 1.5 + df_all['duration_min'].describe()['75%']
-
-    # Clean outlier
     df_all = df_all[df_all['duration_min'] <= outlier]
 
-    # Calculate bin size
     bin_size = int(df_all['duration_min'].max())
-
-    # Set labels
     labels = df_all['channel_title'].unique()
 
-    # Prepare data for plotting
     data = []
     for channel in labels:
         video_durations = df_all[df_all['channel_title'] == channel]['duration_min'].to_numpy()
         data.append(video_durations)
 
-    # Set size
-    plt.figure(figsize=(FIG_W, FIG_H))
-
-    # Plot data
-    plt.hist(data, bins=bin_size, alpha=0.5)
-
-    # Define fonts
-    plt.legend(labels)
-    plt.xlabel('Duration of videos in minutes')
-    plt.ylabel('Videos count')
-    plt.title('Video counts of durations', fontdict = {'fontsize' : TS})
-
     # Create image name
     channel_ids_string = '_'.join(channel_ids)
     image_name = f'static/images/{channel_ids_string}_histogram_video_duration_count.png'
 
-    # Save file
+    plt.figure(figsize=(FIG_W, FIG_H))
+    plt.hist(data, bins=bin_size, alpha=0.5)
+    plt.legend(labels)
+    plt.xlabel('Duration of videos in minutes')
+    plt.ylabel('Videos count')
+    plt.title('Video counts of durations', fontdict = {'fontsize' : TS})
     plt.savefig(image_name, dpi=100)
 
     return image_name
 
-
 def histogram_video_duration_count_single(df_all, channel_id, channel_title=None):
     '''Create a histogram and save the image to a folder. Return image name. Take a dataframe with videodata  as input. Input channel_ids to render image name.'''
 
-    # Select given channel_id
     df_all = df_all[df_all['channel_id'] == channel_id]
 
-    # Calculate outlier
+    # Calculate outlier and clean them
     outlier = (df_all['duration_sec'].describe()['75%'] - df_all['duration_sec'].describe()['25%']) * 1.5 + df_all['duration_sec'].describe()['75%']
-
-    # Clean outlier
     df_all = df_all[df_all['duration_sec'] <= outlier]
 
-    # Calculate minutes and set as integer
     df_all['duration_min'] = df_all['duration_sec'] / 60
     df_all['duration_min'] = df_all['duration_min'].astype('int32')
 
-    # Calculate bin size
     bin_size = df_all['duration_min'].max()
-
     if bin_size < 1:
         bin_size = 1
 
-    # Set size
+    image_name = f'static/images/{channel_id}_histogram_video_duration_count.png'
+
     plt.figure(figsize=(FIG_W, FIG_H))
-
-    # Plot data
     plt.hist(df_all['duration_min'], bins=bin_size, alpha=0.5, edgecolor='black', linewidth=1)
-
-    # Define fonts
     plt.legend(df_all['channel_title'].unique())
     plt.title(f'Video Counts of Durations for "{channel_title}"', fontdict = {'fontsize' : TS})
     plt.xlabel('Video Duration in Minutes')
     plt.ylabel('Video Count')
     plt.xlim(0,bin_size)
-
-    # Create image name
-    image_name = f'static/images/{channel_id}_histogram_video_duration_count.png'
-
-    # Save file
     plt.savefig(image_name, dpi=100)
 
     return image_name
@@ -126,11 +94,10 @@ def barplot_links(video_df, channel_ids):
     # Check if there is 'http' in description and insert result
     video_df['Links in decription'] = video_df['description'].str.contains('http').apply(lambda x: 'Clickable Link' if x else 'No clickable Link')
 
+    channel_ids_string = '_'.join(channel_ids)
+    image_name = f'static/images/{channel_ids_string}_barplot_links.png'
+
     video_df = video_df.groupby(['channel_title', 'Links in decription'])[['video_id']].count().reset_index()
-
-
-
-    # Draw a nested barplot to show survival for class and sex
     sns.set(style="whitegrid")
     g = sns.catplot(x="channel_title",
                     y="video_id",
@@ -144,22 +111,19 @@ def barplot_links(video_df, channel_ids):
     g.set_xlabels("Channel Name")
     g.set_ylabels("Video Count")
     # g.set_title('Links in Video Descriptions', fontdict = {'fontsize' : TS})
-
-    # Create image name
-    channel_ids_string = '_'.join(channel_ids)
-    image_name = f'static/images/{channel_ids_string}_barplot_links.png'
-
-    # Save file
     plt.savefig(image_name, dpi=100)
+
     return image_name
 
 def create_wordcloud(text, stopwords=STOPWORDS,video_id=None, channel_title=None):
+    '''Return a word cloud image name and save the image. Take as input a string of text and a video id or a channel name for creating the title.'''
+
     wordcloud = WordCloud(
         max_font_size=50,
         min_font_size=10,
         max_words=100,
         prefer_horizontal=1,
-        # for transparnt backgroun: mode='RGBA', background_color=None
+        # for transparnt background: mode='RGBA', background_color=None
         # mode="RGBA",
         background_color="white",
         stopwords=stopwords,
@@ -168,6 +132,13 @@ def create_wordcloud(text, stopwords=STOPWORDS,video_id=None, channel_title=None
         # Disable word pairs
         collocations=False
     ).generate(text)
+
+    # Create filename
+    if video_id == None:
+        temp_id = sql.set_temp_id()
+        image_name = f'static/images/{temp_id}_wordcloud.png'
+    else:
+        image_name = f'static/images/{video_id}_wordcloud.png'
 
     if channel_title:
         title = channel_title
@@ -178,31 +149,21 @@ def create_wordcloud(text, stopwords=STOPWORDS,video_id=None, channel_title=None
     plt.title(f'Wordcloud for "{title}"', fontdict = {'fontsize' : TS})
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
-
-    # Create filename
-    if video_id == None:
-        temp_id = sql.set_temp_id()
-        image_name = f'static/images/{temp_id}_wordcloud.png'
-    else:
-        image_name = f'static/images/{video_id}_wordcloud.png'
     plt.savefig(image_name, dpi=100)
-    return image_name
 
+    return image_name
 
 def split_sentiment_pos_neg(comment_sentiment):
     '''Split dataframe into positive, neutral and negative dataframes. Used for plotting.'''
 
-    # Sort value and calculate cumsum
     comment_sentiment.sort_values(by='published_at', inplace=True)
     comment_sentiment['count'] = 1
     comment_sentiment['cumsum'] = comment_sentiment['count'].cumsum()
 
-    # Select negative comments
+    # Select negative and poitive comments
     neg_sent = comment_sentiment[comment_sentiment['compound'] < -0.5]
     neg_sent['count'] = 1
     neg_sent['cumsum'] = neg_sent['count'].cumsum()
-
-    # Select positive comments
     pos_sent = comment_sentiment[comment_sentiment['compound'] > 0.5]
     pos_sent['count'] = 1
     pos_sent['cumsum'] = pos_sent['count'].cumsum()
@@ -211,7 +172,9 @@ def split_sentiment_pos_neg(comment_sentiment):
 
 def lineplot_cumsum_video_comments(comment_sentiment, video_id):
     '''Create and save a lineplot for the cumsum of video comments over time. Return image name.'''
-    # Set size
+
+    image_name = f'static/images/{video_id}_lineplot_cumsum_video_comments.png'
+
     plt.figure(figsize=(FIG_W, FIG_H))
     plt.plot(comment_sentiment['published_at'], comment_sentiment['cumsum'])
     plt.xticks(rotation=ROT)
@@ -219,15 +182,14 @@ def lineplot_cumsum_video_comments(comment_sentiment, video_id):
     plt.xlabel('Date')
     plt.ylabel('Sum of comments')
     plt.grid(b=True)
-
-    # Create image name
-    image_name = f'static/images/{video_id}_lineplot_cumsum_video_comments.png'
-
-    # Save file
     plt.savefig(image_name, dpi=100)
+
     return image_name
 
 def lineplot_cumsum_video_comments_pos_neg(comment_sentiment, pos_sent, neg_sent, video_id):
+    '''Create and save a lineplot for the cumsum of positive and negative sentiments of video comments over time seperately. Return image name.'''
+
+    image_name = f'static/images/{video_id}_lineplot_cumsum_video_comments_pos_neg.png'
 
     plt.figure(figsize=(FIG_W, FIG_H))
     plt.plot('published_at', 'cumsum', data=pos_sent, marker='', color='green', linewidth=1, linestyle='-', label="Positive Sentiment")
@@ -238,17 +200,14 @@ def lineplot_cumsum_video_comments_pos_neg(comment_sentiment, pos_sent, neg_sent
     plt.ylabel('Sum of comments')
     plt.xticks(rotation=ROT)
     plt.grid(b=True)
-
-    # Create image name
-    image_name = f'static/images/{video_id}_lineplot_cumsum_video_comments_pos_neg.png'
-
-    # Save file
     plt.savefig(image_name, dpi=100)
-    return image_name
 
+    return image_name
 
 def scatterplot_sentiment_likecount(comment_sentiment, pos_sent, neg_sent, video_id):
     '''Create a scatterplot with like counts vs.sentiment. Save image.Return image name. Take as input the output of "split_sentiment_pos_neg()" and a video id.'''
+
+    image_name = f'static/images/{video_id}_scatterplot_sentiment_likecount.png'
 
     fig = plt.figure(figsize=(FIG_W, FIG_H))
     plt.scatter(comment_sentiment['compound'], np.log1p(comment_sentiment['like_count']), label='Neutral Sentiment')
@@ -260,17 +219,13 @@ def scatterplot_sentiment_likecount(comment_sentiment, pos_sent, neg_sent, video
     plt.ylabel('Logarithm of Like count')
     plt.legend()
     plt.grid(b=True)
-
-    # Create image name
-    image_name = f'static/images/{video_id}_scatterplot_sentiment_likecount.png'
-
-    # Save file
     fig.savefig(image_name, dpi=100)
+
     return image_name
 
 def top_videos(video_df, metric='view', n=5):
     '''Return a table with top n videos of all channels in the dataframe considering a given metric. Possible metrics are like, dislike, comment and view'''
-    metric = metric
+
     df_table = video_df.sort_values(by=f'{metric}_count',ascending=False).groupby('channel_title').head(n).sort_values(by=f'{metric}_count', ascending=False)[['channel_title', 'title', f'{metric}_count']].rename(columns={'channel_title':'Channel Title', 'title':'Video Title', f'{metric}_count':f'{metric.capitalize()} Count'}).set_index('Channel Title')
     df_table = df_table.reset_index()
     df_table = df_table.set_index(df_table.index + 1)
@@ -278,4 +233,5 @@ def top_videos(video_df, metric='view', n=5):
     df_table = df_table.rename(columns={'index':'Rank'})
     df_table = df_table.set_index(['Rank', 'Channel Title', 'Video Title',f'{metric.capitalize()} Count'])
     df_table.reset_index(inplace=True)
+
     return df_table
