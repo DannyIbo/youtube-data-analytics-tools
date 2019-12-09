@@ -11,6 +11,24 @@ import re
 import datetime
 import pytz
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import logging
+import sys
+
+
+logger = logging.getLogger('name')
+logger = logger
+handler = logging.StreamHandler(sys.stderr)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+
+# def log_message(logger, message):
+#     logger = logging.getLogger('name')
+#     logger = logger
+#     handler = logging.StreamHandler(sys.stderr)
+#     logger.addHandler(handler)
+#     logger.setLevel(logging.INFO)
+#     return logger.info(message)
 
 def video_categories(youtube, regionCode="None", part=None, id=None):
     '''Return a json file of categories and a dict, that is reduced to ids and titles'''
@@ -19,7 +37,6 @@ def video_categories(youtube, regionCode="None", part=None, id=None):
 
     if part == None:
         return video_category_dict
-
     else:
         request = youtube.videoCategories().list(
             part=part,
@@ -28,17 +45,14 @@ def video_categories(youtube, regionCode="None", part=None, id=None):
         )
         video_categories_response = request.execute()
         video_category_dict = {x['id']: x['snippet']['title'] for x in video_categories_response['items']}
-
         return video_categories_response
-
 
 def youtubeAPIkey(DEVELOPER_KEY, OAUTHLIB_INSECURE_TRANSPORT = "1", api_service_name = "youtube", api_version = "v3"):
     '''Get YouTube Data API credentials via API Key\n
     Disable OAuthlib's HTTPS verification when running locally.\n
     *DO NOT* leave this option enabled in production.'''
 
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = OAUTHLIB_INSECURE_TRANSPORT #"1"
-
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = OAUTHLIB_INSECURE_TRANSPORT
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, developerKey = DEVELOPER_KEY)
     return youtube
@@ -60,19 +74,20 @@ def youtubeSearchList(youtube, channel_id=None, q=None, maxResults=50, type=None
 
 def youtubeSearchListStatistics(youtube, q=None, maxResults=10):
     '''Get video search results for a query. Returns advanced statistics such as counts forlikes, dislikes, views and comments. Return a json file.'''
-    # Search query
+
     query_result = youtubeSearchList(youtube, q=q, maxResults=maxResults, type='video')
+
     # Create a list of video ids
     video_id_list = [x['id']['videoId'] for x in query_result['items']]
-    # Query statistics
+
     snippets = video_snippets(youtube, video_id_list, maxResults=10, part="statistics")
-    # Check if length of search results matches statistics
     assert len(query_result['items']) == len(snippets), 'Query result length does not match statistics length.'
-    # Insert statistics into search results
+
     counter = 0
     for i in query_result['items']:
         i['statistics'] = snippets[counter]['statistics']
         counter += 1
+
     return query_result
 
 def videoIdList(youtube, channelId):
@@ -94,7 +109,6 @@ def videoIdList(youtube, channelId):
     playlistNextPageToken = ''
 
     while playlistNextPageToken != None:
-
         requestPlaylistItems = youtube.playlistItems().list(
             part="snippet"
             ,maxResults=50
@@ -103,14 +117,13 @@ def videoIdList(youtube, channelId):
         )
         responsePlaylistItems = requestPlaylistItems.execute()
 
-        # Append videos to Video List
         for video in responsePlaylistItems['items']:
             videoIdList.append(video['snippet']['resourceId']['videoId'])
 
-        # Set nextPageToken
         playlistNextPageToken = responsePlaylistItems.get('nextPageToken')
 
-    print('The channel', channelId, 'has', len(videoIdList), 'public videos')
+    logger.info(f'The channel {channelId} has {len(videoIdList)} public videos')
+
     return videoIdList
 
 def list_slice(input_list, n=50):
@@ -119,10 +132,12 @@ def list_slice(input_list, n=50):
     s = 0
     e = n
     list_slices = []
+
     while s < len(input_list):
         list_slices.append(','.join(input_list[s:e]))
         s = e
         e += n
+
     return list_slices
 
 def videoSnippet(youtube, videoId, maxResults=50, part="snippet,statistics,contentDetails,player,status"):
@@ -167,11 +182,8 @@ def video_snippets(youtube, video_id_list, maxResults=50, part="snippet,statisti
 
 
 def youtubeOauth(scopes, api_service_name, api_version, client_secrets_file, OAUTHLIB_INSECURE_TRANSPORT):
-    # Disable OAuthlib's HTTPS verification when running locally.
-    # *DO NOT* leave this option enabled in production.
+    '''Disable OAuthlib's HTTPS verification when running locally. *DO NOT* leave this option enabled in production.'''
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = OAUTHLIB_INSECURE_TRANSPORT
-
-    # Get credentials and create an API client
     flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
         client_secrets_file, scopes)
     credentials = flow.run_console()
@@ -179,7 +191,8 @@ def youtubeOauth(scopes, api_service_name, api_version, client_secrets_file, OAU
         api_service_name, api_version, credentials=credentials)
     return youtube_analytics
 
-def csv_videolist(filename):    #open csv file and return content as object
+def csv_videolist(filename):
+    '''Open csv file and return content as object'''
     with open(filename, 'r') as wbs:
         content = csv.reader(wbs)
     return content
@@ -189,7 +202,7 @@ def to_int(string):
     return int(string[:-1]) if string else 0
 
 def get_duration_sec(pt):
-    '''Turn duration from text string such as 'PT1H23M09S' to an int'''
+    '''Turn duration from text string such as 'PT1H23M09S' to an int of seconds'''
     pattern = 'PT(\d*H)?(\d*M)?(\d*S)?'
     timestamp = [to_int(x) for x in re.findall(pattern, pt)[0]]
     duration_sec = timestamp[0] * 3600 + timestamp[1] * 60 + timestamp[2]
@@ -236,7 +249,6 @@ def snippets_to_dict(video_snippet_list, yt_credentials=None):
         del df_data['category']
 
     for i in video_snippet_list:
-
         df_data['video_id'].append(i.get('id'))
         df_data['published_at'].append(pd.to_datetime(i.get('snippet').get('publishedAt')))
         df_data['channel_id'].append(i.get('snippet').get('channelId'))
@@ -286,7 +298,14 @@ def get_channel_snippet(youtube, channel_id, nextPageToken=None):
     return response
 
 
-def get_comment_threads(youtube, part="id,replies,snippet", channel_id=None, comment_thread_id=None, video_id=None, maxResults=100):
+def get_comment_threads(
+    youtube,
+    part="id,replies,snippet",
+    channel_id=None,
+    comment_thread_id=None,
+    video_id=None,
+    maxResults=100
+):
     '''Return a .json with top-level comments and meta data. Take as input the youtube credential object and the videoId.\n
     Specify exactly one filter out of: channel_id, comment_thread_id, video_id.\n
     See detailied info in the documentation: https://developers.google.com/youtube/v3/docs/commentThreads/list \n
@@ -304,12 +323,8 @@ def get_comment_threads(youtube, part="id,replies,snippet", channel_id=None, com
     if 'snippet' in part:
         cost_per_query += 2
 
-    print('Starting getting comment threads')
-
     while commentThreadsNextPageToken != None:
-
         costs += cost_per_query
-
         request = youtube.commentThreads().list(
             part=part,
             maxResults=maxResults,
@@ -320,12 +335,11 @@ def get_comment_threads(youtube, part="id,replies,snippet", channel_id=None, com
         )
         response = request.execute()
         [output.append(x) for x in response['items']]
-
         commentThreadsNextPageToken = response.get('nextPageToken')
 
     if costs > 0:
-        print(f'Comment thread query costs: {costs}')
-    print('Done getting comment threads')
+        logger.info(f'Comment thread query costs: {costs}')
+
     return output
 
 
@@ -349,7 +363,7 @@ def comment_threads_to_dict(comments):
     'total_reply_count':[],
     'is_public':[]}
 
-    print('Starting writing comment threads to dict')
+    logger.info('Start writing comment threads to dict')
 
     for i in comments:
         if i.get('snippet').get('topLevelComment'):
@@ -388,7 +402,7 @@ def comment_threads_to_dict(comments):
                 df_data['canReply'].append(c['snippet'].get('canReply'))
                 df_data['total_reply_count'].append(c['snippet'].get('totalReplyCount'))
                 df_data['is_public'].append(c['snippet'].get('isPublic'))
-    print('Done writing comment threads to dict')
+    logger.info('Done writing comment threads to dict')
     return df_data
 
 
@@ -408,7 +422,7 @@ def get_comments_list(youtube, part="id", maxResults=100, parent_id=None, id=Non
         cost_per_query += 2
 
     # Loop as long as there are next pages of results
-    print('Start getting comment id list')
+    logger.info('Start getting comment id list')
     while commentThreadsNextPageToken != None:
 
         # Increment costs
@@ -431,8 +445,8 @@ def get_comments_list(youtube, part="id", maxResults=100, parent_id=None, id=Non
 
     # Print costs
     if costs > 0:
-        print(f'Comment list query costs: {costs}')
-    print('Done getting comment id list')
+        logger.info(f'Comment list query costs: {costs}')
+    logger.info('Done getting comment id list')
     return response
 
 def list_slice(input_list, n=50):
@@ -464,7 +478,7 @@ def comment_list_to_dict(reply_comments_snippets):
     'published_at':[],
     'updated_at':[]}
 
-    print('Start writing comment list to dict')
+    logger.info('Start writing comment list to dict')
     for i in reply_comments_snippets:
         if i.get('id'):
             df_data['comment_id'].append(i['id'])
@@ -480,13 +494,16 @@ def comment_list_to_dict(reply_comments_snippets):
             df_data['like_count'].append(i['snippet']['likeCount'])
             df_data['published_at'].append(i['snippet']['publishedAt'])
             df_data['updated_at'].append(i['snippet']['updatedAt'])
-    print('Done writing comment list to dict')
+    logger.info('Done writing comment list to dict')
     return df_data
 
 
 def get_all_comments(youtube, video_id):
+
+    logger.info('Starting to get comment threads')
     # Get list of snippets of threads
     thread_snippets = get_comment_threads(youtube, part="snippet,replies", video_id=video_id)
+    logger.info('Done getting comment threads')
 
     # Check if the thread comments have more than 5 replies and if true append the id to a dict
     thread_ids_with_more_replies = {}
@@ -518,7 +535,7 @@ def get_all_comments(youtube, video_id):
     reply_ids = {}
 
     # Loop through thread ids with >5 replies
-    print('Start searching for reply comment ids, that were not downloaded yet')
+    logger.info('Start searching for reply comment ids, that were not downloaded yet')
     for id_string in thread_ids_with_more_replies:
 
         # Get the reply ids
@@ -528,7 +545,7 @@ def get_all_comments(youtube, video_id):
         for r_id in replies['items']:
             if r_id['id'] not in already_downloaded_replies:
                 reply_ids[r_id['id']] = True
-    print('Done searching for reply comment ids, that were not downloaded yet')
+    logger.info('Done searching for reply comment ids, that were not downloaded yet')
 
     # Create a list with id strings
     strings_of_reply_ids = list_slice(list(reply_ids), n=50)
@@ -537,11 +554,11 @@ def get_all_comments(youtube, video_id):
     reply_snippets = []
 
     # Get reply snippets, that were not downloaded yet
-    print('Start downloadingreply comments, that were not downloaded yet')
+    logger.info('Start downloading reply comments, that were not downloaded yet')
     for id_string in strings_of_reply_ids:
         r_snippets = get_comments_list(youtube, part="snippet", parent_id=None, id=id_string)
         reply_snippets += r_snippets['items']
-    print('Start downloadingreply comments, that were not downloaded yet')
+    logger.info('Done downloading reply comments, that were not downloaded yet')
 
     # Create an empty list for already downloaded replies (that came with threads)
     already_downloaded_replies = []

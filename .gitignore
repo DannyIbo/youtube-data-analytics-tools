@@ -108,3 +108,4 @@ config.py
 
 # Divers
 static/images/*
+logfiles/
