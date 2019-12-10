@@ -14,13 +14,10 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import logging
 import sys
 
-
-logger = logging.getLogger('name')
-logger = logger
+logger = logging.getLogger('youtube_data_module_logger')
 handler = logging.StreamHandler(sys.stderr)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
-
 
 # def log_message(logger, message):
 #     logger = logging.getLogger('name')
@@ -422,12 +419,10 @@ def get_comments_list(youtube, part="id", maxResults=100, parent_id=None, id=Non
         cost_per_query += 2
 
     # Loop as long as there are next pages of results
-    logger.info('Start getting comment id list')
-    while commentThreadsNextPageToken != None:
 
+    while commentThreadsNextPageToken != None:
         # Increment costs
         costs += cost_per_query
-
         # Do the youtube request
         request = youtube.comments().list(
             part=part,
@@ -439,14 +434,13 @@ def get_comments_list(youtube, part="id", maxResults=100, parent_id=None, id=Non
 
         # Append each element sepeerately to the output list
         [output.append(x) for x in response['items']]
-
         # Get a NextPageToken in case there is one, else set it to None
         commentThreadsNextPageToken = response.get('nextPageToken')
 
     # Print costs
     if costs > 0:
         logger.info(f'Comment list query costs: {costs}')
-    logger.info('Done getting comment id list')
+
     return response
 
 def list_slice(input_list, n=50):
@@ -517,7 +511,7 @@ def get_all_comments(youtube, video_id):
             thread_ids_with_more_replies[t_id['id']] = True
 
             # This print statement tries to evaluate an error, that I couldn't fix yet
-            print(t_id['id'], 'has more than 5 replies')
+            logger.info(t_id['id'], 'has more than 5 replies')
             if t_id.get('replies') != None:
 
                 # Write reply id to dict
@@ -525,7 +519,7 @@ def get_all_comments(youtube, video_id):
                     already_downloaded_replies[reply_id['id']] = True
             else:
                 # This print statement tries to evaluate an error, that I couldn't fix yet
-                print(f"* * * * * {t_id['id']} would throw a key error for 'replies' * * * * * ")
+                logger.info(f"* * * * * {t_id['id']} would throw a key error for 'replies' * * * * * ")
 
     # Get a list of reply ids for thread ids with more than 5 replies
     # Slice list into strings of 50 ids each
@@ -535,17 +529,15 @@ def get_all_comments(youtube, video_id):
     reply_ids = {}
 
     # Loop through thread ids with >5 replies
-    logger.info('Start searching for reply comment ids, that were not downloaded yet')
+    logger.info('Start getting reply comment ids, that were not downloaded yet')
     for id_string in thread_ids_with_more_replies:
-
         # Get the reply ids
         replies = get_comments_list(youtube, part="id", parent_id=id_string, id=None)
-
         # Write the reply ids into a dict, if they are not downlaoded yet
         for r_id in replies['items']:
             if r_id['id'] not in already_downloaded_replies:
                 reply_ids[r_id['id']] = True
-    logger.info('Done searching for reply comment ids, that were not downloaded yet')
+    logger.info('Done getting reply comment ids, that were not downloaded yet')
 
     # Create a list with id strings
     strings_of_reply_ids = list_slice(list(reply_ids), n=50)

@@ -3,6 +3,13 @@ from src import youtube_data_module as ydt
 from src import viz
 import pandas as pd
 import os
+import logging
+import sys
+
+logger = logging.getLogger('app_logger')
+handler = logging.StreamHandler(sys.stderr)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 API_KEY = os.getenv('YOUTUBE_API_KEY')
 
@@ -33,13 +40,13 @@ def video_comments():
 
     youtube = ydt.youtubeAPIkey(API_KEY)
 
-    print('Getting all comments')
+    logger.info('Getting all comments')
     all_snippets = ydt.get_all_comments(youtube, video_id)
-    print('Writing comments to dict')
+    logger.info('Writing comments to dict')
     comment_dict = ydt.extract_comments(all_snippets)
 
     image_names = []
-    print('Generating wordcloud')
+    logger.info('Generating wordcloud')
     comment_string = ydt.concat_comments(comment_dict)
     video_title = video_id
     image_names.append(viz.create_wordcloud(comment_string, stopwords=None, video_id=video_id, channel_title=video_title))
