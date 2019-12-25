@@ -19,14 +19,6 @@ handler = logging.StreamHandler(sys.stderr)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-# def log_message(logger, message):
-#     logger = logging.getLogger('name')
-#     logger = logger
-#     handler = logging.StreamHandler(sys.stderr)
-#     logger.addHandler(handler)
-#     logger.setLevel(logging.INFO)
-#     return logger.info(message)
-
 def video_categories(youtube, regionCode="None", part=None, id=None):
     '''Return a json file of categories and a dict, that is reduced to ids and titles'''
 
